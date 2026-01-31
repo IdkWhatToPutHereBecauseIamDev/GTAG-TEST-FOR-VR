@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Hookin' Madness: GTag Edition</title>
+    <!-- Core A-Frame -->
+    <script src="https://aframe.io"></script>
+    <!-- Physics Engine for Collisions -->
+    <script src="https://cdn.jsdelivr.net"></script>
+    
+    <style>
+      #gui {
+        position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+        z-index: 1000; text-align: center; color: white; font-family: sans-serif;
+      }
+      .btn { background: #ef2d5e; border: none; padding: 15px 30px; color: white; border-radius: 10px; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+
+    <div id="gui">
+      <h1>HOOKIN' MADNESS</h1>
+      <button class="btn" onclick="document.getElementById('gui').style.display='none'">START TAGGING</button>
+    </div>
+
+    <!-- Physics helps with gravity and wall bouncing -->
+    <a-scene physics="debug: false; gravity: -9.8">
+      
+      <a-assets>
+        <!-- Hook/Hand Model Placeholder -->
+        <a-mixin id="hand" geometry="primitive: box; width: 0.1; height: 0.1; depth: 0.2" material="color: #555"></a-mixin>
+      </a-assets>
+
+      <!-- The Environment -->
+      <a-sky color="#87CEEB"></a-sky>
+      <a-plane static-body position="0 0 0" rotation="-90 0 0" width="100" height="100" color="#222"></a-plane>
+      
+      <!-- GTag Style Climbing Walls/Ramps -->
+      <a-box static-body position="0 5 -10" width="10" height="10" depth="1" color="#444"></a-box>
+      <a-box static-body position="-5 10 -15" width="5" height="20" depth="5" color="#333"></a-box>
+      
+      <!-- The Player Rig -->
+      <!-- 'kinematic-body' allows the player to have physical presence but controlled by scripts -->
+      
+        <a-camera id="head" look-controls>
+          <!-- The 'Hook' Hand for mobile (using look-vector) -->
+          
+            
+          
+        </a-camera>
+      
+
+    </a-scene>
+
+    <script>
+      // GTAG PHYSICS COMPONENT
+      // This detects if your "hand" hits a surface and flings you the opposite way
+      AFRAME.registerComponent('gtag-push', {
+        init: function () {
+          this.el.addEventListener('mousedown', () => {
+            const ray = this.el.components.raycaster;
+            const intersection = ray.intersections[0];
+            
+            if (intersection) {
+              const rig = document.querySelector('#rig');
+              const direction = new THREE.Vector3();
+              
+              // Get the angle the player is looking
+              this.el.sceneEl.camera.getWorldDirection(direction);
+              
+              // Reverse the direction to "push away" from the point
+              direction.multiplyScalar(-15); // Velocity strength
+              
+              // Apply velocity to the rig
+              rig.body.velocity.set(direction.x, 10, direction.z); 
+              console.log("Fling!");
+            }
+          });
+        }
+      });
+    </script>
+  </body>
+</html>
